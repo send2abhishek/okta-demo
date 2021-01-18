@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Route, Switch, useHistory } from "react-router-dom";
+import { SecureRoute, Security, LoginCallback } from "@okta/okta-react";
+import { OktaAuth } from "@okta/okta-auth-js";
+import Home from "./Components/Home.jsx";
+import About from "./Components/About.jsx";
+import Login from "./Components/Login.jsx";
 
-function App() {
+const oktaAuth = new OktaAuth({
+  issuer: "https://dev-6427851.okta.com/oauth2/default",
+  clientId: "0oa1c6zndFpgLjH7J5d6",
+  redirectUri: window.location.origin + "/implicit/callback",
+});
+
+const App = (props) => {
+  const history = useHistory();
+
+  const customAuthHandler = (oktaAuth) => {
+    history.push("/implicit");
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Switch>
+      <Security oktaAuth={oktaAuth} onAuthRequired={customAuthHandler}>
+        <SecureRoute exact path="/" component={Home} />
+        <Route path="/implicit/callback" component={LoginCallback} />
+        <Route exact path="/implicit" component={Login} />
+        <SecureRoute exact path="/about" component={About} />
+      </Security>
+    </Switch>
   );
-}
+};
 
 export default App;
